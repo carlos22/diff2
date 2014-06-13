@@ -12,7 +12,7 @@ class Diff
       pathElement =
         key: key
         valueType: newValueType
-      path = path.concat [pathElement]
+      path = [].concat path, [pathElement]
     if not oldValue
       return [@_createDifference Diff.DIFFERENCE_TYPES.ADDED, path, newValue]
     else if not newValue
@@ -62,7 +62,8 @@ class Diff
     {}.toString.call(input) is "[object Array]"
 
 
-  applyDifferences: (object, differences) ->
+  applyDifferences: (object, originalDifferences) ->
+    differences = @_clone originalDifferences
     differences.forEach (difference) =>
       lastKey = difference.path.pop().key
       lastReference = difference.path.reduce(
@@ -86,6 +87,17 @@ class Diff
   _createFromType: (type) ->
     return {} if type is 'object'
     return [] if type is 'array'
+
+
+  _clone: (input) ->
+    output = null
+    if typeof input is 'object'
+      output = @_createFromType @_getType input
+      Object.keys(input).forEach (key) =>
+        output[key] = @_clone input[key]
+    else
+      output = input
+    output
 
 
 module.exports = new Diff
