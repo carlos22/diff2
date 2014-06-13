@@ -1,0 +1,27 @@
+{
+  "name": "diff2",
+  "version": "0.1.0",
+  "homepage": "https://github.com/efacilitation/diff2",
+  "authors": [
+    "efa GmbH <team@efa-gmbh.com>"
+  ],
+  "description": "Calculate the difference between two things and apply them to other things",
+  "main": "dist/diff.js",
+  "moduleType": [
+    "node"
+  ],
+  "keywords": [
+    "diff",
+    "deep-diff",
+    "difference",
+    "change-tracking"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
