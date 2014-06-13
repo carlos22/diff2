@@ -16,32 +16,73 @@ This can also be an empty object to get a tree like representation of the differ
 
 ## Example
 
-```javascript
-var oldObject = {
-  property: 'value'
-  nestedObject: {
-    foo: 'bar'
-    number: 1
-  }
-  array: [1, 2, 3, 4, 5]
-}
+Given:
 
-var newObject = {
-  property: 'new value'
+```javascript
+oldObject = {
+  property: 'value',
+  nestedObject: {
+    foo: 'bar',
+    number: 1
+  },
+  array: [1, 2, 3, 4, 5]
+};
+
+newObject = {
+  property: 'new value',
   nestedObject: {
     foo: 'baz'
-  }
+  },
   newNestedObject: {
     bar: 'foo'
-  }
+  },
   array: [3, 2, 1, 4]
-}
+};
+```
 
-var differences = diff.calculateDifferences(oldObject, newObject);
-diff.applyDifferences(oldObject, differences);
-// oldObject is now deep equal to newObject
+Executing `diff.calculateDifferences(oldObject, newObject);` will output:
 
-var diffAsTree = {};
-diff.applyDifferences(diffAsTree, differences);
-// diffAsTree reflects the differences as tree
+```javascript
+[ { type: 'changed',
+    path: [ { key: 'property', valueType: 'string' } ],
+    value: 'new value' },
+  { type: 'changed',
+    path:
+     [ { key: 'nestedObject', valueType: 'object' },
+       { key: 'foo', valueType: 'string' } ],
+    value: 'baz' },
+  { type: 'deleted',
+    path:
+     [ { key: 'nestedObject', valueType: 'object' },
+       { key: 'number', valueType: 'undefined' } ],
+    value: undefined },
+  { type: 'changed',
+    path:
+     [ { key: 'array', valueType: 'array' },
+       { key: '0', valueType: 'number' } ],
+    value: 3 },
+  { type: 'changed',
+    path:
+     [ { key: 'array', valueType: 'array' },
+       { key: '2', valueType: 'number' } ],
+    value: 1 },
+  { type: 'deleted',
+    path:
+     [ { key: 'array', valueType: 'array' },
+       { key: '4', valueType: 'undefined' } ],
+    value: undefined },
+  { type: 'added',
+    path: [ { key: 'newNestedObject', valueType: 'object' } ],
+    value: { bar: 'foo' } } ]
+```
+
+Executing `diff.applyDifferences(oldObject, differences);` will cause oldObject to deep equal newObject.
+
+Executing `diff.applyDifferences(emptyObject, differences);` will result in a tree like representation:
+
+```javascript
+{ property: 'new value',
+  nestedObject: { foo: 'baz' },
+  array: [ 3, , 1 ],
+  newNestedObject: { bar: 'foo' } }
 ```
