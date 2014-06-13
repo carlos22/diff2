@@ -12,17 +12,21 @@ describe 'diff', ->
         foo: 'bar'
       newObject = clone oldObject
 
+
     it 'should track and apply property changes', ->
       newObject.foo = 'moo'
       calculateAndApply oldObject, newObject
+
 
     it 'should track and apply property deletions', ->
       delete newObject.foo
       calculateAndApply oldObject, newObject
 
+
     it 'should track and apply property creations', ->
       newObject.foo2 = 'bar2'
       calculateAndApply oldObject, newObject
+
 
     it 'should track and apply property type changes', ->
       newObject.foo = 1
@@ -44,6 +48,7 @@ describe 'diff', ->
       newObject.foo =
         childFoo: 'childBar'
       calculateAndApply oldObject, newObject
+
 
     it 'should track and apply object property creations', ->
       oldObject =
@@ -229,7 +234,6 @@ describe 'diff', ->
       diffObject.someNested.so[3].deeper[1].so = 'deepest'
       diffObject.someNested.so[3].deeper[1].noes = 'gotchya'
       diffObject.someNested.so[3].deeper.push 'TROLLFACE'
-
       expect(diffObject).to.deep.equal difftree
 
 

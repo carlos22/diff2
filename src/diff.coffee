@@ -1,5 +1,10 @@
 class Diff
 
+  @OPERATION_TYPES =
+    ADDED: 'added'
+    DELETED: 'deleted'
+    CHANGED: 'changed'
+
   calculateDifferences: (oldValue, newValue, key = '', path = []) ->
     newValueType = @_getType newValue
     oldValueType = @_getType oldValue
@@ -9,15 +14,15 @@ class Diff
         valueType: newValueType
       path = path.concat [pathElement]
     if not oldValue
-      return [@_createDifference 'added', path, newValue]
+      return [@_createDifference Diff.OPERATION_TYPES.ADDED, path, newValue]
     else if not newValue
-      return [@_createDifference 'delete', path]
+      return [@_createDifference Diff.OPERATION_TYPES.DELETED, path]
     else if oldValueType isnt newValueType
-      return [@_createDifference 'change', path, newValue]
+      return [@_createDifference Diff.OPERATION_TYPES.CHANGED, path, newValue]
     else if typeof oldValue is 'object'
       return @_getNestedDifferences oldValue, newValue, key, path
     else if newValue isnt oldValue
-      return [@_createDifference 'change', path, newValue]
+      return [@_createDifference Diff.OPERATION_TYPES.CHANGED, path, newValue]
     else
       return []
 
@@ -67,7 +72,7 @@ class Diff
           object[pathElement.key]
       , object
       )
-      if difference.type is 'change' or difference.type is 'added'
+      if difference.type is Diff.OPERATION_TYPES.CHANGED or difference.type is Diff.OPERATION_TYPES.ADDED
         lastReference[lastKey] = difference.value
       else
         delete lastReference[lastKey]

@@ -1,1 +1,133 @@
-var Diff;Diff=function(){function e(){}return e.prototype.calculateDifferences=function(e,t,r,n){var c,o,u;return null==r&&(r=""),null==n&&(n=[]),c=this._getType(t),o=this._getType(e),""!==r&&(u={key:r,valueType:c},n=n.concat([u])),e?t?o!==c?[this._createDifference("change",n,t)]:"object"==typeof e?this._getNestedDifferences(e,t,r,n):t!==e?[this._createDifference("change",n,t)]:[]:[this._createDifference("delete",n)]:[this._createDifference("added",n,t)]},e.prototype._createDifference=function(e,t,r){return{type:e,path:t,value:r}},e.prototype._getNestedDifferences=function(e,t,r,n){var c,o;return null==r&&(r=""),null==n&&(n=[]),c=this._union(Object.keys(e),Object.keys(t)),o=c.map(function(r){return function(c){return r.calculateDifferences(e[c],t[c],c,n)}}(this)),this._flatten(o)},e.prototype._union=function(e,t){return e.concat(t.filter(function(t){return-1===e.indexOf(t)}))},e.prototype._flatten=function(e){return e.reduce(function(e,t){return e.concat(t)},[])},e.prototype._getType=function(e){var t;return t=typeof e,"object"===t&&this._isArray(e)?"array":t},e.prototype._isArray=function(e){return"[object Array]"==={}.toString.call(e)},e.prototype.applyDifferences=function(e,t){return t.forEach(function(t){return function(r){var n,c;return n=r.path.pop().key,c=r.path.reduce(function(e,r){return e[r.key]||t._createValue(e,r.key,r.valueType),e[r.key]},e),"change"===r.type||"added"===r.type?c[n]=r.value:delete c[n]}}(this)),e},e.prototype._createValue=function(e,t,r){return e[t]=this._createFromType(r)},e.prototype._createFromType=function(e){return"object"===e?{}:"array"===e?[]:void 0},e}(),module.exports=new Diff;
+var Diff;
+
+Diff = (function() {
+  function Diff() {}
+
+  Diff.OPERATION_TYPES = {
+    ADDED: 'added',
+    DELETED: 'deleted',
+    CHANGED: 'changed'
+  };
+
+  Diff.prototype.calculateDifferences = function(oldValue, newValue, key, path) {
+    var newValueType, oldValueType, pathElement;
+    if (key == null) {
+      key = '';
+    }
+    if (path == null) {
+      path = [];
+    }
+    newValueType = this._getType(newValue);
+    oldValueType = this._getType(oldValue);
+    if (key !== '') {
+      pathElement = {
+        key: key,
+        valueType: newValueType
+      };
+      path = path.concat([pathElement]);
+    }
+    if (!oldValue) {
+      return [this._createDifference(Diff.OPERATION_TYPES.ADDED, path, newValue)];
+    } else if (!newValue) {
+      return [this._createDifference(Diff.OPERATION_TYPES.DELETED, path)];
+    } else if (oldValueType !== newValueType) {
+      return [this._createDifference(Diff.OPERATION_TYPES.CHANGED, path, newValue)];
+    } else if (typeof oldValue === 'object') {
+      return this._getNestedDifferences(oldValue, newValue, key, path);
+    } else if (newValue !== oldValue) {
+      return [this._createDifference(Diff.OPERATION_TYPES.CHANGED, path, newValue)];
+    } else {
+      return [];
+    }
+  };
+
+  Diff.prototype._createDifference = function(type, path, value) {
+    return {
+      type: type,
+      path: path,
+      value: value
+    };
+  };
+
+  Diff.prototype._getNestedDifferences = function(oldObject, newObject, key, path) {
+    var allKeysToCheck, differences;
+    if (key == null) {
+      key = '';
+    }
+    if (path == null) {
+      path = [];
+    }
+    allKeysToCheck = this._union(Object.keys(oldObject), Object.keys(newObject));
+    differences = allKeysToCheck.map((function(_this) {
+      return function(key) {
+        return _this.calculateDifferences(oldObject[key], newObject[key], key, path);
+      };
+    })(this));
+    return this._flatten(differences);
+  };
+
+  Diff.prototype._union = function(array1, array2) {
+    return array1.concat(array2.filter(function(value) {
+      return array1.indexOf(value) === -1;
+    }));
+  };
+
+  Diff.prototype._flatten = function(arrayOfArrays) {
+    return arrayOfArrays.reduce((function(prev, current) {
+      return prev.concat(current);
+    }), []);
+  };
+
+  Diff.prototype._getType = function(input) {
+    var type;
+    type = typeof input;
+    if (type === 'object' && this._isArray(input)) {
+      return 'array';
+    } else {
+      return type;
+    }
+  };
+
+  Diff.prototype._isArray = function(input) {
+    return {}.toString.call(input) === "[object Array]";
+  };
+
+  Diff.prototype.applyDifferences = function(object, differences) {
+    differences.forEach((function(_this) {
+      return function(difference) {
+        var lastKey, lastReference;
+        lastKey = difference.path.pop().key;
+        lastReference = difference.path.reduce(function(object, pathElement) {
+          if (!object[pathElement.key]) {
+            _this._createValue(object, pathElement.key, pathElement.valueType);
+          }
+          return object[pathElement.key];
+        }, object);
+        if (difference.type === Diff.OPERATION_TYPES.CHANGED || difference.type === Diff.OPERATION_TYPES.ADDED) {
+          return lastReference[lastKey] = difference.value;
+        } else {
+          return delete lastReference[lastKey];
+        }
+      };
+    })(this));
+    return object;
+  };
+
+  Diff.prototype._createValue = function(object, key, type) {
+    return object[key] = this._createFromType(type);
+  };
+
+  Diff.prototype._createFromType = function(type) {
+    if (type === 'object') {
+      return {};
+    }
+    if (type === 'array') {
+      return [];
+    }
+  };
+
+  return Diff;
+
+})();
+
+module.exports = new Diff;
