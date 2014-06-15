@@ -236,13 +236,22 @@ describe 'diff', ->
       diffObject.someNested.so[3].deeper.push 'TROLLFACE'
       expect(diffObject).to.deep.equal difftree
 
-    it 'applying differences should not modify the given differences array', ->
+
+    it 'should not modify the given differences array while applying differences', ->
       oldObject = {}
       newObject = {name: 'John'}
       differences = diff.calculateDifferences oldObject, newObject
       differencesClone = diff._clone differences
       diff.applyDifferences oldObject, differences
       expect(differences).to.deep.equal differencesClone
+
+
+    it 'should ignore functions', ->
+      oldObject = {}
+      newObject = {foo: ->}
+      differences = diff.calculateDifferences oldObject, newObject
+      diff.applyDifferences oldObject, differences
+      expect(oldObject).to.deep.equal {}
 
 
 calculateAndApply = (oldObject, newObject) ->

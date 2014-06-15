@@ -13,7 +13,9 @@ class Diff
         key: key
         valueType: newValueType
       path = [].concat path, [pathElement]
-    if not oldValue
+    if typeof oldValue is 'function' or typeof newValue is 'function'
+      return []
+    else if not oldValue
       return [@_createDifference Diff.DIFFERENCE_TYPES.ADDED, path, newValue]
     else if not newValue
       return [@_createDifference Diff.DIFFERENCE_TYPES.DELETED, path]
