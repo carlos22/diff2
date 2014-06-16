@@ -5,7 +5,7 @@
   "authors": [
     "efa GmbH <team@efa-gmbh.com>"
   ],
-  "description": "Calculate the difference between two things and apply them to other things",
+  "description": "Calculate the difference between two JavaScript objects and apply them to other JavaScript objects",
   "main": "dist/diff.js",
   "moduleType": [
     "node"
