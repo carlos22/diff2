@@ -245,12 +245,6 @@ describe 'diff', ->
       expect(differences).to.deep.equal differencesClone
 
 
-    it.only 'should track and apply differences 10000 times', ->
-      for i in [0..10000]
-        differences = diff.calculateDifferences oldObject, newObject
-        diff.applyDifferences oldObject, differences
-
-
 calculateAndApply = (oldObject, newObject) ->
   differences = diff.calculateDifferences oldObject, newObject
   appliedObj = diff.applyDifferences oldObject, differences
