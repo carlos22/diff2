@@ -19,8 +19,8 @@ class Diff
       return [@_createDifference Diff.DIFFERENCE_TYPES.DELETED, path]
     else if oldValueType isnt newValueType
       return [@_createDifference Diff.DIFFERENCE_TYPES.CHANGED, path, newValue]
-    else if typeof oldValue is 'object'
-      return @_getNestedDifferences oldValue, newValue, key, path
+    else if oldValueType is 'object' or oldValueType is 'array'
+      return @_getNestedDifferences oldValue, newValue, path
     else if newValue isnt oldValue
       return [@_createDifference Diff.DIFFERENCE_TYPES.CHANGED, path, newValue]
     else
@@ -28,12 +28,15 @@ class Diff
 
 
   _createDifference: (type, path, value) ->
-    type: type
-    path: path
-    value: value
+    difference =
+      type: type
+      path: path
+    if value
+      difference.value = value
+    difference
 
 
-  _getNestedDifferences: (oldObject, newObject, key = '', path = []) ->
+  _getNestedDifferences: (oldObject, newObject, path = []) ->
     allKeysToCheck = @_union Object.keys(oldObject), Object.keys(newObject)
     differences = allKeysToCheck.map(
       (key) =>
@@ -62,11 +65,11 @@ class Diff
     {}.toString.call(input) is "[object Array]"
 
 
-  applyDifferences: (object, originalDifferences) ->
-    differences = @_clone originalDifferences
+  applyDifferences: (object, differences) ->
     differences.forEach (difference) =>
-      lastKey = difference.path.pop().key
-      lastReference = difference.path.reduce(
+      pathCopy = difference.path.slice 0
+      lastKey = pathCopy.pop().key
+      lastReference = pathCopy.reduce(
         (object, pathElement) =>
           if not object[pathElement.key]
             @_createValue object, pathElement.key, pathElement.valueType
@@ -87,17 +90,6 @@ class Diff
   _createFromType: (type) ->
     return {} if type is 'object'
     return [] if type is 'array'
-
-
-  _clone: (input) ->
-    output = null
-    if typeof input is 'object'
-      output = @_createFromType @_getType input
-      Object.keys(input).forEach (key) =>
-        output[key] = @_clone input[key]
-    else
-      output = input
-    output
 
 
 module.exports = new Diff

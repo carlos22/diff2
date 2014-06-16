@@ -5,12 +5,12 @@ describe 'diff', ->
   oldObject = null
   newObject = null
 
-  describe 'properties', ->
+  describe 'given simple properties', ->
 
     beforeEach ->
       oldObject =
         foo: 'bar'
-      newObject = diff._clone oldObject
+      newObject = clone oldObject
 
 
     it 'should track and apply property changes', ->
@@ -33,18 +33,18 @@ describe 'diff', ->
       calculateAndApply oldObject, newObject
 
 
-  describe 'objects', ->
+  describe 'given nested objects', ->
 
     it 'should track and apply empty object creations', ->
       oldObject = {}
-      newObject = diff._clone oldObject
+      newObject = clone oldObject
       newObject.foo = {}
       calculateAndApply oldObject, newObject
 
 
     it 'should track and apply pre filled object creations', ->
       oldObject = {}
-      newObject = diff._clone oldObject
+      newObject = clone oldObject
       newObject.foo =
         childFoo: 'childBar'
       calculateAndApply oldObject, newObject
@@ -53,7 +53,7 @@ describe 'diff', ->
     it 'should track and apply object property creations', ->
       oldObject =
         foo: {}
-      newObject = diff._clone oldObject
+      newObject = clone oldObject
       newObject.foo.bar = 'bar'
       calculateAndApply oldObject, newObject
 
@@ -62,7 +62,7 @@ describe 'diff', ->
       oldObject =
         foo:
           childFoo: 'childBar'
-      newObject = diff._clone oldObject
+      newObject = clone oldObject
       newObject.foo.childFoo = 'childBar2'
       calculateAndApply oldObject, newObject
 
@@ -71,7 +71,7 @@ describe 'diff', ->
       oldObject =
         foo:
           childFoo: 'childBar'
-      newObject = diff._clone oldObject
+      newObject = clone oldObject
       delete newObject.foo.childFoo
       calculateAndApply oldObject, newObject
 
@@ -80,7 +80,7 @@ describe 'diff', ->
       oldObject =
         foo:
           childFoo: 'childBar'
-      newObject = diff._clone oldObject
+      newObject = clone oldObject
       newObject.foo =
         childFoo2: 'childBar2'
       calculateAndApply oldObject, newObject
@@ -90,23 +90,23 @@ describe 'diff', ->
       oldObject =
         foo:
           childFoo: 'childBar'
-      newObject = diff._clone oldObject
+      newObject = clone oldObject
       delete newObject.foo
       calculateAndApply oldObject, newObject
 
 
-  describe 'arrays', ->
+  describe 'given nested arrays', ->
 
     it 'should track and apply empty array creations', ->
       oldObject = {}
-      newObject = diff._clone oldObject
+      newObject = clone oldObject
       newObject.array = []
       calculateAndApply oldObject, newObject
 
 
     it 'should track and apply pre filled array creations', ->
       oldObject = {}
-      newObject = diff._clone oldObject
+      newObject = clone oldObject
       newObject.array = [1, 2, 3]
       calculateAndApply oldObject, newObject
 
@@ -114,7 +114,7 @@ describe 'diff', ->
     it 'should track and apply push of new elements', ->
       oldObject =
         array: []
-      newObject = diff._clone oldObject
+      newObject = clone oldObject
       newObject.array.push 1
       calculateAndApply oldObject, newObject
 
@@ -122,7 +122,7 @@ describe 'diff', ->
     it 'should track and apply removal of elements', ->
       oldObject =
         array: [1]
-      newObject = diff._clone oldObject
+      newObject = clone oldObject
       newObject.array.pop()
       calculateAndApply oldObject, newObject
 
@@ -130,7 +130,7 @@ describe 'diff', ->
     it 'should track and apply value changes of elements', ->
       oldObject =
         array: [1]
-      newObject = diff._clone oldObject
+      newObject = clone oldObject
       newObject.array[0] = 2
       calculateAndApply oldObject, newObject
 
@@ -138,7 +138,7 @@ describe 'diff', ->
     it 'should track and apply property changes of object elements', ->
       oldObject =
         array: [foo: 'bar']
-      newObject = diff._clone oldObject
+      newObject = clone oldObject
       newObject.array[0].foo = 'baz'
       calculateAndApply oldObject, newObject
 
@@ -146,7 +146,7 @@ describe 'diff', ->
     it 'should track and apply array deletions', ->
       oldObject =
         array: []
-      newObject = diff._clone oldObject
+      newObject = clone oldObject
       delete newObject.array
       calculateAndApply oldObject, newObject
 
@@ -154,7 +154,7 @@ describe 'diff', ->
     it 'should track and apply array replacements', ->
       oldObject =
         array: [1, 2, 3]
-      newObject = diff._clone oldObject
+      newObject = clone oldObject
       newObject.array = [4, 5, 6]
       calculateAndApply oldObject, newObject
 
@@ -162,14 +162,14 @@ describe 'diff', ->
     it 'should track and apply movement of objects inside array', ->
       oldObject =
         array: [{foo: 'bar'}, {moo: 'cow'}]
-      newObject = diff._clone oldObject
-      first = diff._clone oldObject.array[0]
-      second = diff._clone oldObject.array[1]
+      newObject = clone oldObject
+      first = clone oldObject.array[0]
+      second = clone oldObject.array[1]
       newObject.array = [first, second]
       calculateAndApply oldObject, newObject
 
 
-  describe 'advanced', ->
+  describe 'given a complex object', ->
     beforeEach ->
       oldObject =
         someProp: 'bar'
@@ -191,7 +191,7 @@ describe 'diff', ->
               ]
             }
           ]
-      newObject = diff._clone oldObject
+      newObject = clone oldObject
       newObject.someProp = 'moo'
       newObject.someNested.soNew = 'wat'
       newObject.someNested.someArray = []
@@ -201,8 +201,8 @@ describe 'diff', ->
       newObject.someNested.so[2].deeper[1].so = 'deepest'
       newObject.someNested.so[2].deeper[1].noes = 'gotchya'
       newObject.someNested.so[2].deeper.push 'TROLLFACE'
-      deepObj = diff._clone newObject.someNested.so[2]
-      notsodeepObj = diff._clone newObject.someNested.so[3]
+      deepObj = clone newObject.someNested.so[2]
+      notsodeepObj = clone newObject.someNested.so[3]
       newObject.someNested.so[2] = notsodeepObj
       newObject.someNested.so[3] = deepObj
 
@@ -236,16 +236,33 @@ describe 'diff', ->
       diffObject.someNested.so[3].deeper.push 'TROLLFACE'
       expect(diffObject).to.deep.equal difftree
 
-    it 'applying differences should not modify the given differences array', ->
+    it 'should not modify the given differences upon applying', ->
       oldObject = {}
       newObject = {name: 'John'}
       differences = diff.calculateDifferences oldObject, newObject
-      differencesClone = diff._clone differences
+      differencesClone = clone differences
       diff.applyDifferences oldObject, differences
       expect(differences).to.deep.equal differencesClone
+
+
+    it.only 'should track and apply differences 10000 times', ->
+      for i in [0..10000]
+        differences = diff.calculateDifferences oldObject, newObject
+        diff.applyDifferences oldObject, differences
 
 
 calculateAndApply = (oldObject, newObject) ->
   differences = diff.calculateDifferences oldObject, newObject
   appliedObj = diff.applyDifferences oldObject, differences
   expect(newObject).to.deep.equal appliedObj
+
+
+clone = (input) ->
+  output = null
+  if typeof input is 'object'
+    output = diff._createFromType diff._getType input
+    Object.keys(input).forEach (key) =>
+      output[key] = clone input[key]
+  else
+    output = input
+  output
