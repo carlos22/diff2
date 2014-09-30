@@ -32,6 +32,13 @@ describe 'diff', ->
       newObject.foo = 1
       calculateAndApply oldObject, newObject
 
+    it 'should track and apply property changes of falsy values', ->
+      newObject.foo = 0
+      calculateAndApply oldObject, newObject
+
+    it 'should track and apply property changes of null values', ->
+      newObject.foo = null
+      calculateAndApply oldObject, newObject
 
   describe 'given nested objects', ->
 

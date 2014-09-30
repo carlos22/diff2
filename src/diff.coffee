@@ -15,9 +15,9 @@ class Diff
       path = [].concat path, [pathElement]
     if typeof oldValue is 'function' or typeof newValue is 'function'
       return []
-    else if not oldValue
+    else if oldValueType is 'undefined'
       return [@_createDifference Diff.DIFFERENCE_TYPES.ADDED, path, newValue]
-    else if not newValue
+    else if newValueType is 'undefined'
       return [@_createDifference Diff.DIFFERENCE_TYPES.DELETED, path]
     else if oldValueType isnt newValueType
       return [@_createDifference Diff.DIFFERENCE_TYPES.CHANGED, path, newValue]
@@ -33,7 +33,7 @@ class Diff
     difference =
       type: type
       path: path
-    if value
+    if @_getType value is not 'undefined'
       difference.value = value
     difference
 
