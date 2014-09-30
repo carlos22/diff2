@@ -33,7 +33,7 @@ class Diff
     difference =
       type: type
       path: path
-    if @_getType value is not 'undefined'
+    if @_getType value isnt 'undefined'
       difference.value = value
     difference
 
